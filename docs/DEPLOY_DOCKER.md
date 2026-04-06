@@ -2,34 +2,13 @@
 
 본 프로젝트는 Docker를 사용하여 Nginx 환경에서 배포하도록 구성되어 있습니다.
 
-## 1. 서버에서 직접 배포 (Manual Deployment)
+## 1. 배포 방식 (Docker Hub 이미지 기반)
 
-새로운 서버에서 아래 명령어를 순차적으로 실행하여 프로젝트를 빌드하고 컨테이너를 실행합니다.
+서버에서는 소스 코드를 `git clone` 하거나 `docker build` 하지 않습니다.
+이미지는 개발 PC 또는 CI/CD에서 빌드/푸시하고, 서버에서는 Docker Hub에서 이미지를 `pull` 받아 실행합니다.
 
-```bash
-# 1. 프로젝트 복제
-git clone <repository-url>
-cd auth-admin-frontend
+## 2. 개발 PC(또는 CI)에서 이미지 푸시 (Push)
 
-# 2. Docker 이미지 빌드
-docker build -t auth-admin-frontend .
-
-# 3. Docker 컨테이너 실행
-# 외부 80포트를 컨테이너 80포트에 연결합니다.
-docker run -d -p 80:80 --name auth-admin-container auth-admin-frontend
-```
-
-### 주의 사항
-- `nginx.conf` 파일 내의 `proxy_pass http://backend-service:8080/api/;` 부분은 실제 백엔드 서버의 주소(IP 또는 도커 서비스명)에 맞게 수정이 필요할 수 있습니다.
-- 빌드 전 수정한 뒤 다시 `docker build`를 진행해 주세요.
-
----
-
-## 2. 도커 허브(Docker Hub)를 활용한 이미지 기반 배포 (추천)
-
-서버에서 직접 소스 코드를 `git clone` 하지 않아도 됩니다. 개발 PC에서 빌드한 이미지를 도커 허브에 올리고(Push), 서버에서 그 이미지를 내려받아(Pull) 실행하는 방식입니다.
-
-### 2.1 개발 PC에서 이미지 푸시 (Push)
 ```bash
 # 1. 도커 허브 로그인
 docker login
@@ -41,7 +20,7 @@ docker build -t <dockerhub-username>/auth-admin-frontend:latest .
 docker push <dockerhub-username>/auth-admin-frontend:latest
 ```
 
-### 2.2 서버에서 이미지 풀 및 실행 (Pull & Run)
+## 3. 서버에서 이미지 풀 및 실행 (Pull & Run)
 서버에는 Docker만 설치되어 있으면 됩니다. 소스 코드는 필요하지 않습니다.
 
 ```bash
@@ -58,5 +37,6 @@ docker run -d -p 80:80 --name auth-admin-container <dockerhub-username>/auth-adm
 
 ---
 
-## 3. 사전 준비 사항
+## 4. 사전 준비 사항
 1. **Docker Registry**: Docker Hub 또는 AWS ECR, Github Packages 등의 컨테이너 레지스트리가 필요합니다.
+2. **Nginx 설정 확인**: `nginx.conf`의 `proxy_pass http://backend-service:8080/api/;`는 실제 백엔드 주소(도커 서비스명 또는 IP)로 맞춰야 합니다.
