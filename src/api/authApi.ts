@@ -1,67 +1,18 @@
 import type {
-  EmailLoginPayload,
-  EmailSignupPayload,
-  IdLoginPayload,
-  IdSignupPayload,
+  AdminLoginPayload,
   OAuthProvider,
-  PhoneLoginPayload,
-  PhoneSignupPayload,
 } from "../types/auth";
 import { normalizeTokenPayload, request } from "./httpClient";
 import { buildSessionFromToken, clearSession, getDeviceId, loadSession, saveSession } from "./sessionStore";
 
-export async function loginByEmail(payload: EmailLoginPayload): Promise<void> {
-  const data = await request<unknown>("/api/v1/auth/email/login", {
+export async function loginAdmin(payload: AdminLoginPayload): Promise<void> {
+  const data = await request<unknown>("/api/v1/auth/admin/login", {
     method: "POST",
     auth: false,
     withDeviceId: true,
     body: JSON.stringify(payload),
   });
   saveSession(buildSessionFromToken(normalizeTokenPayload(data)));
-}
-
-export async function loginById(payload: IdLoginPayload): Promise<void> {
-  const data = await request<unknown>("/api/v1/auth/id/login", {
-    method: "POST",
-    auth: false,
-    withDeviceId: true,
-    body: JSON.stringify(payload),
-  });
-  saveSession(buildSessionFromToken(normalizeTokenPayload(data)));
-}
-
-export async function loginByPhone(payload: PhoneLoginPayload): Promise<void> {
-  const data = await request<unknown>("/api/v1/auth/phone/login", {
-    method: "POST",
-    auth: false,
-    withDeviceId: true,
-    body: JSON.stringify(payload),
-  });
-  saveSession(buildSessionFromToken(normalizeTokenPayload(data)));
-}
-
-export async function signupByEmail(payload: EmailSignupPayload): Promise<void> {
-  await request<unknown>("/api/v1/auth/email/signup", {
-    method: "POST",
-    auth: false,
-    body: JSON.stringify(payload),
-  });
-}
-
-export async function signupById(payload: IdSignupPayload): Promise<void> {
-  await request<unknown>("/api/v1/auth/id/signup", {
-    method: "POST",
-    auth: false,
-    body: JSON.stringify(payload),
-  });
-}
-
-export async function signupByPhone(payload: PhoneSignupPayload): Promise<void> {
-  await request<unknown>("/api/v1/auth/phone/signup", {
-    method: "POST",
-    auth: false,
-    body: JSON.stringify(payload),
-  });
 }
 
 export async function logout(logoutAll: boolean): Promise<void> {

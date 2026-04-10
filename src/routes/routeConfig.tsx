@@ -2,7 +2,6 @@ import { Navigate } from "react-router-dom";
 import AppLayout from "../layouts/AppLayout";
 import RequireAuth from "../features/auth/RequireAuth";
 import LoginPage from "../features/auth/pages/LoginPage";
-import SignupPage from "../features/auth/pages/SignupPage";
 import OAuthStartPage from "../features/auth/pages/OAuthStartPage";
 import DashboardPage from "../features/admin/pages/DashboardPage";
 import HealthPage from "../features/admin/pages/HealthPage";
@@ -21,12 +20,6 @@ export const appRoutes: AppRouteObject[] = [
   {
     path: "/login",
     element: <LoginPage />,
-    handle: { standalone: true },
-    meta: { standalone: true },
-  },
-  {
-    path: "/signup",
-    element: <SignupPage />,
     handle: { standalone: true },
     meta: { standalone: true },
   },

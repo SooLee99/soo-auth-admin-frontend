@@ -63,12 +63,20 @@ export function normalizeTokenPayload(payload: unknown): TokenResponse {
 
   const accessExpiresInSec = Number(d.accessExpiresInSec ?? d.access_expires_in_sec);
   const refreshExpiresInSec = Number(d.refreshExpiresInSec ?? d.refresh_expires_in_sec);
+  const role = typeof d.role === "string" ? d.role : typeof d.userRole === "string" ? d.userRole : undefined;
+  const roles = Array.isArray(d.roles)
+    ? d.roles.filter((item): item is string => typeof item === "string")
+    : Array.isArray(d.authorities)
+    ? d.authorities.filter((item): item is string => typeof item === "string")
+    : undefined;
 
   return {
     accessToken,
     refreshToken,
     accessExpiresInSec: Number.isFinite(accessExpiresInSec) ? accessExpiresInSec : undefined,
     refreshExpiresInSec: Number.isFinite(refreshExpiresInSec) ? refreshExpiresInSec : undefined,
+    role,
+    roles,
   };
 }
 
