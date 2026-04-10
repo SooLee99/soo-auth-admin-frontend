@@ -1,6 +1,7 @@
 import { FormEvent, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { loginByEmail, loginById, loginByPhone, getCurrentDeviceId } from "../../../api/authApi";
+import { clearSession } from "../../../api/sessionStore";
 import type { LoginMethod } from "../../../types/auth";
 import { useAuth } from "../useAuth";
 
@@ -46,7 +47,10 @@ export default function LoginPage(): JSX.Element {
       const from = (location.state as LocationState | null)?.from;
       navigate(from ?? "/", { replace: true });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "로그인에 실패했습니다.");
+      // Ensure failed login never keeps a stale authenticated session.
+      clearSession();
+      refreshAuthState();
+      setError(e instanceof Error ? `로그인 실패: ${e.message}` : "로그인 실패: 원인을 확인할 수 없습니다.");
     } finally {
       setSubmitting(false);
     }
