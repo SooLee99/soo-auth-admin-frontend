@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { getHealth, getLoginHistory } from "../../../api/adminApi";
-import type { HealthSnapshot, LoginHistoryItem } from "../../../types/admin";
+import { getHealth, getLoginHistory, getSmsLogs, getSmsStats } from "../../../api/adminApi";
+import type { HealthSnapshot, LoginHistoryItem, SmsLogItem, SmsStat } from "../../../types/admin";
 import PageFrame from "../../../components/common/PageFrame";
 import StatusBadge from "../../../components/common/StatusBadge";
 import { useAdminShell } from "../useAdminShell";
@@ -42,10 +42,31 @@ function toPercent(part: number | undefined, total: number | undefined): number 
   return Math.max(0, Math.min(100, (part / total) * 100));
 }
 
+function valueText(value: unknown): string {
+  if (value === undefined || value === null || value === "") return "-";
+  if (typeof value === "number") return Number.isFinite(value) ? value.toLocaleString() : "-";
+  if (typeof value === "boolean") return value ? "true" : "false";
+  return String(value);
+}
+
+function statEntries(stats: SmsStat | null): Array<[string, unknown]> {
+  if (!stats) return [];
+  return Object.entries(stats).filter(([, v]) => v === null || ["string", "number", "boolean"].includes(typeof v));
+}
+
+function pickValue(record: Record<string, unknown>, keys: string[]): unknown {
+  for (const key of keys) {
+    if (record[key] !== undefined && record[key] !== null && record[key] !== "") return record[key];
+  }
+  return undefined;
+}
+
 export default function DashboardPage(): JSX.Element {
   const { toggleSidebar } = useAdminShell();
   const [health, setHealth] = useState<HealthSnapshot | null>(null);
   const [history, setHistory] = useState<LoginHistoryItem[]>([]);
+  const [smsStats, setSmsStats] = useState<SmsStat | null>(null);
+  const [smsLogs, setSmsLogs] = useState<SmsLogItem[]>([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -55,12 +76,16 @@ export default function DashboardPage(): JSX.Element {
   async function load(): Promise<void> {
     setError("");
     try {
-      const [healthRes, historyRes] = await Promise.all([
+      const [healthRes, historyRes, smsStatsRes, smsLogsRes] = await Promise.all([
         getHealth(),
         getLoginHistory({ page: 0, size: 20, sort: "createdAt,desc" }),
+        getSmsStats(),
+        getSmsLogs({ page: 0, size: 10 }),
       ]);
       setHealth(healthRes);
       setHistory(historyRes.content);
+      setSmsStats(smsStatsRes);
+      setSmsLogs(smsLogsRes.content);
     } catch (e) {
       setError(e instanceof Error ? e.message : "대시보드 조회에 실패했습니다.");
     }
@@ -195,6 +220,45 @@ export default function DashboardPage(): JSX.Element {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+
+        <div className="col-12">
+          <div className="card p-3">
+            <h6 className="mb-3">SMS 대시보드</h6>
+            <div className="health-metrics-grid mb-3">
+              {statEntries(smsStats).length === 0 && (
+                <div className="health-kv-card">
+                  <div className="health-kv-label">통계</div>
+                  <div className="health-kv-value">-</div>
+                </div>
+              )}
+              {statEntries(smsStats).slice(0, 8).map(([key, value]) => (
+                <div key={key} className="health-kv-card">
+                  <div className="health-kv-label">{key}</div>
+                  <div className="health-kv-value">{valueText(value)}</div>
+                </div>
+              ))}
+            </div>
+            <div className="small text-muted mb-2">최근 SMS 로그 {smsLogs.length}건</div>
+            <ul className="small mb-0">
+              {smsLogs.slice(0, 5).map((item, index) => {
+                const row = item as Record<string, unknown>;
+                const to = valueText(pickValue(row, ["to", "smsTo"]));
+                const provider = valueText(pickValue(row, ["provider"]));
+                const ok = pickValue(row, ["ok"]);
+                const status = typeof ok === "boolean" ? (ok ? "UP" : "DOWN") : valueText(pickValue(row, ["status"]));
+                const at = pickValue(row, ["at", "createdAt"]);
+                const text = valueText(pickValue(row, ["text", "smsText"]));
+                const key = valueText(pickValue(row, ["id"])) !== "-" ? String(pickValue(row, ["id"])) : `${to}-${index}`;
+                return (
+                  <li key={key}>
+                    {to} / {provider} / <StatusBadge value={status} /> / {fmtDateTime(typeof at === "string" ? at : undefined)} / {text}
+                  </li>
+                );
+              })}
+              {smsLogs.length === 0 && <li>-</li>}
+            </ul>
           </div>
         </div>
 

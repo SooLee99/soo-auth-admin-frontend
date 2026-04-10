@@ -97,6 +97,36 @@ export type UserStatusAuditItem = {
   actionAt?: string;
 };
 
+export type SmsSendResponse = {
+  id: number;
+  to?: string;
+  from?: string;
+  text?: string;
+  ok?: boolean;
+  provider?: string;
+  at?: string;
+  [key: string]: unknown;
+};
+
+export type SmsLogItem = {
+  id: number;
+  to?: string;
+  from?: string;
+  text?: string;
+  ok?: boolean;
+  provider?: string;
+  at?: string;
+  createdAt?: string;
+  [key: string]: unknown;
+};
+
+export type SmsStat = {
+  totalCount?: number;
+  successCount?: number;
+  failCount?: number;
+  [key: string]: unknown;
+};
+
 export type HealthComponent = {
   status?: string;
   latencyMs?: number;

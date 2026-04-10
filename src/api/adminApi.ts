@@ -2,8 +2,11 @@ import type { PageResponse } from "../types/api";
 import type {
   HealthSnapshot,
   LoginHistoryItem,
+  SmsLogItem,
+  SmsStat,
   UserDetail,
   UserListItem,
+  SmsSendResponse,
   UserStatusAuditItem,
   UserStatusItem,
   UserUpdatePayload,
@@ -22,6 +25,29 @@ function query(params: Record<string, string | number | undefined>): string {
 
 export function getHealth(): Promise<HealthSnapshot> {
   return request<HealthSnapshot>("/api/v1/auth/admin/health", { method: "GET" });
+}
+
+export function sendSms(payload: { to: string; text: string }): Promise<SmsSendResponse> {
+  return request<SmsSendResponse>("/api/v1/auth/admin/sms/send", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function getSmsLogs(params: {
+  page: number;
+  size: number;
+  startDate?: string;
+  endDate?: string;
+}): Promise<PageResponse<SmsLogItem>> {
+  return request<PageResponse<SmsLogItem>>(`/api/v1/auth/admin/sms/logs${query(params)}`, { method: "GET" });
+}
+
+export function getSmsStats(params: {
+  startDate?: string;
+  endDate?: string;
+} = {}): Promise<SmsStat> {
+  return request<SmsStat>(`/api/v1/auth/admin/sms/stats${query(params)}`, { method: "GET" });
 }
 
 export function getUsers(params: {

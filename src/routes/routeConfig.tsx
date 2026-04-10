@@ -11,6 +11,7 @@ import UserDetailPage from "../features/admin/pages/UserDetailPage";
 import BlockedUsersPage from "../features/admin/pages/BlockedUsersPage";
 import DeletedUsersPage from "../features/admin/pages/DeletedUsersPage";
 import LoginHistoryPage from "../features/admin/pages/LoginHistoryPage";
+import SmsPage from "../features/admin/pages/SmsPage";
 import UserStatusAuditsPage from "../features/admin/pages/UserStatusAuditsPage";
 import UserLoginHistoryPage from "../features/admin/pages/UserLoginHistoryPage";
 import UnsupportedPage from "../features/admin/pages/UnsupportedPage";
@@ -44,6 +45,7 @@ export const appRoutes: AppRouteObject[] = [
           { index: true, element: <DashboardPage />, meta: { title: "대시보드", sidebar: true } },
           { path: "/health", element: <HealthPage />, meta: { title: "헬스", sidebar: true } },
           { path: "/login-history", element: <LoginHistoryPage />, meta: { title: "로그인 이력", sidebar: true } },
+          { path: "/sms", element: <SmsPage />, meta: { title: "SMS", sidebar: true } },
           { path: "/users", element: <UsersPage />, meta: { title: "사용자 목록", sidebar: true } },
           { path: "/users/blocked", element: <BlockedUsersPage />, meta: { title: "차단 사용자", sidebar: true } },
           { path: "/users/deleted", element: <DeletedUsersPage />, meta: { title: "탈퇴 사용자", sidebar: true } },
@@ -66,6 +68,7 @@ export const sidebarItems: SidebarItem[] = [
   { key: "dashboard", label: "대시보드", path: "/" },
   { key: "health", label: "헬스", path: "/health" },
   { key: "login-history", label: "로그인 이력", path: "/login-history" },
+  { key: "sms", label: "SMS", path: "/sms" },
   {
     key: "users",
     label: "사용자 관리",
