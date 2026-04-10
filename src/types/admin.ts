@@ -97,17 +97,73 @@ export type UserStatusAuditItem = {
   actionAt?: string;
 };
 
-export type HealthComponent = { status?: string; latencyMs?: number };
+export type HealthComponent = {
+  status?: string;
+  latencyMs?: number;
+  [key: string]: unknown;
+};
+
+export type HealthMonitoringTarget = {
+  status?: string;
+  latencyMs?: number;
+  httpStatus?: number;
+  url?: string;
+  error?: string;
+  [key: string]: unknown;
+};
+
+export type HealthMonitoringComponent = HealthComponent & {
+  targets?: Record<string, HealthMonitoringTarget | undefined>;
+};
+
+export type HealthDatabasePool = {
+  activeConnections?: number;
+  idleConnections?: number;
+  threadsAwaitingConnection?: number;
+  totalConnections?: number;
+};
+
+export type HealthDatabaseComponent = HealthComponent & {
+  product?: string;
+  version?: string;
+  driver?: string;
+  url?: string;
+  pool?: HealthDatabasePool;
+};
+
+export type HealthSystemJvm = {
+  heapUsedBytes?: number;
+  heapMaxBytes?: number;
+  processors?: number;
+};
+
+export type HealthSystemDisk = {
+  totalBytes?: number;
+  usableBytes?: number;
+};
 
 export type HealthSnapshot = {
   status?: "UP" | "DOWN" | string;
   application?: string;
+  version?: string;
+  startedAt?: string;
   profiles?: string[];
   uptimeSec?: number;
-  components?: Record<string, HealthComponent | undefined>;
+  build?: {
+    version?: string;
+    buildTime?: string | null;
+    gitCommitId?: string | null;
+    gitBranch?: string | null;
+  };
+  components?: {
+    database?: HealthDatabaseComponent;
+    redis?: HealthComponent;
+    monitoring?: HealthMonitoringComponent;
+    [key: string]: HealthComponent | HealthMonitoringComponent | HealthDatabaseComponent | undefined;
+  };
   system?: {
-    jvm?: { heapUsedBytes?: number; heapMaxBytes?: number; processors?: number };
-    disk?: { totalBytes?: number; usableBytes?: number };
+    jvm?: HealthSystemJvm;
+    disk?: HealthSystemDisk;
   };
   links?: Record<string, Record<string, string> | undefined>;
 };
